@@ -1,11 +1,11 @@
-const sg = require('sendgrid')(process.env.SG_API_KEY);
-sg.globalRequest.headers['User-Agent'] = 'subscription-widget/1.0.0';
-
 const path = require('path');
 const Settings = require('../../settings');
 const optIn = 'opt-in';
 
-function prepareConfirmationEmail(reqBody) {
+const sg = require('sendgrid')(Settings.SG_API_KEY);
+sg.globalRequest.headers['User-Agent'] = 'subscription-widget/1.0.0';
+
+function prepareConfirmationEmail (reqBody) {
 	const subject = "Please Confirm Your Email Address";
 	const url = formatUrl(Settings.url) + '/success';
 	const link = "<a href='" + url + "'>this link</a>"
@@ -16,30 +16,30 @@ function prepareConfirmationEmail(reqBody) {
 	    {
 	      to: [
 	        {
-	          email: reqBody.email,
+	          email: reqBody.email
 	        }
 	      ],
 	      subject: subject,
 	      custom_args: {
 	      	type: optIn,
-	      	time_sent: String(Date.now()),
+	      	time_sent: String(Date.now())
 	      },
 	      substitutions: {
 	      	link_insert: link
 	      }
-	    },
+	    }
 	  ],
 	  from: {
 	    email: Settings.senderEmail,
-	    name: Settings.senderName,
+	    name: Settings.senderName
 	  },
 	  content: [
 	    {
 	      type: "text/html",
-	      value: mailText,
+	      value: mailText
 	    }
 	  ]
-	}
+	};
 
 	const templateId = Settings.templateId;
 	if (templateId) emailBody.template_id = templateId;
@@ -51,7 +51,7 @@ function prepareConfirmationEmail(reqBody) {
 	return emailBody;
 }
 
-function prepareNotificationEmail(reqBody) {
+function prepareNotificationEmail (reqBody) {
 	const subject = "New email signup";
 	const mailText = "A new person just confirmed they would look to receive your emails via your email subscription widget.<br/><b>Name: </b>" + reqBody.first_name + " " + reqBody.last_name + "<br/><b>Email: </b>" + reqBody.email;
 
@@ -60,23 +60,23 @@ function prepareNotificationEmail(reqBody) {
 	    {
 	      to: [
 	        {
-	          email: Settings.notificationEmail,
+	          email: Settings.notificationEmail
 	        }
 	      ],
 	      subject: subject
-	    },
+	    }
 	  ],
 	  from: {
 	    email: Settings.senderEmail,
-	    name: Settings.senderName,
+	    name: Settings.senderName
 	  },
 	  content: [
 	    {
 	      type: "text/html",
-	      value: mailText,
+	      value: mailText
 	    }
-	  ],
-	}
+	  ]
+	};
 
 	return emailBody;
 }
@@ -126,7 +126,7 @@ exports.addUser = function(req, res, next) {
 	});
 }
 
-function addUserToList(emailBody, callback) {
+function addUserToList (emailBody, callback) {
 	console.log(emailBody);
 
 	var ignoreFields = ['ip', 'sg_event_id', 'sg_message_id', 'useragent', 'event',
@@ -185,7 +185,7 @@ function addUserToList(emailBody, callback) {
 
 }
 
-function checkAndAddCustomFields(submittedFields, callback) {
+function checkAndAddCustomFields (submittedFields, callback) {
 	var request = sg.emptyRequest({
 		method: 'GET',
 		path: '/v3/contactdb/custom_fields',
@@ -232,14 +232,14 @@ function checkAndAddCustomFields(submittedFields, callback) {
     });
 }
 
-function formatUrl(url) {
+function formatUrl (url) {
 	if (url.substr(-1) == '/') {
 		return url.substring(0, url.length - 1);
 	}
 	return url;
 }
 
-function stringInArray(string, array) {
+function stringInArray (string, array) {
 	var isInArray = false;
 	array.map((item) => {
 		if (string == item) {
